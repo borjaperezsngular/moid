@@ -5,20 +5,39 @@
   <title>Publicador falso - prueba MOID</title>
 
   <script>
+    var moidPurposeConsents = { 1: true, 3: true, 4: true, 7: true };
+    var moidTcData = {
+      gdprApplies: false,
+      cmpStatus: 'loaded',
+      eventStatus: 'tcloaded',
+      purpose: { consents: moidPurposeConsents },
+      vendor: { consents: {} },
+      purposeConsents: moidPurposeConsents,
+      vendorConsents: {},
+      listenerId: 1
+    };
+
     window.__tcfapi = function (command, version, callback) {
       if (version !== 2) {
         callback(null, false);
         return;
       }
 
-      if (command === 'getTCData' || command === 'addEventListener') {
-        callback({
-          gdprApplies: false,
-          purpose: { consents: { 1: true, 3: true, 4: true, 7: true } },
-          vendor: { consents: {} }
-        }, true);
+      if (command === 'getTCData') {
+        callback(moidTcData, true);
         return;
       }
+
+      if (command === 'addEventListener') {
+        callback(moidTcData, true);
+        return moidTcData.listenerId;
+      }
+
+      if (command === 'removeEventListener') {
+        callback(true);
+        return;
+      }
+
       if (command === 'ping') {
         callback({
           gdprApplies: false,
@@ -55,7 +74,7 @@
 </head>
 <body>
   <h1>Publicador externo falso</h1>
-  <div id="div-gpt-ad" aria-hidden="true"></div>
+  <div id="div-gpt-ad" role="group" aria-label="Contenedor del anuncio de prueba"></div>
 
   <script>
     (function () {
