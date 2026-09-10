@@ -15,7 +15,12 @@
         return;
       }
       if (command === 'ping') {
-        callback({ gdprApplies: false, cmpLoaded: true }, true);
+        callback({
+          gdprApplies: false,
+          cmpLoaded: true,
+          cmpStatus: 'loaded',
+          apiVersion: '2.0'
+        }, true);
       }
     };
   </script>
@@ -33,6 +38,7 @@
     googletag.cmd.push(function () {
       googletag.defineSlot('/6355419/Travel/Europe', [300, 250], 'div-gpt-ad')
         .addService(googletag.pubads());
+      googletag.pubads().disableInitialLoad();
       googletag.enableServices();
     });
   </script>
@@ -43,12 +49,14 @@
 
   <script>
     (function () {
-      googletag.cmd.push(function () {
-        googletag.display('div-gpt-ad');
-      });
-
       var s = document.createElement('script');
       s.async = true;
+      s.onload = function () {
+        googletag.cmd.push(function () {
+          googletag.display('div-gpt-ad');
+          googletag.pubads().refresh();
+        });
+      };
       s.src = 'https://masorangeadvertising.es/advertising/publisher-script?siteId=test';
       document.head.appendChild(s);
     })();
