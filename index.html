@@ -28,7 +28,10 @@
           apiVersion: '2.0',
           tcfPolicyVersion: 2
         }, true);
+        return;
       }
+
+      callback(null, false);
     };
   </script>
 
@@ -52,7 +55,7 @@
 </head>
 <body>
   <h1>Publicador externo falso</h1>
-  <div id="div-gpt-ad" role="region" aria-label="Espacio publicitario de prueba"></div>
+  <div id="div-gpt-ad" aria-hidden="true"></div>
 
   <script>
     (function () {
