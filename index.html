@@ -18,8 +18,10 @@
         callback({
           gdprApplies: false,
           cmpLoaded: true,
+          cmpId: 1,
           cmpStatus: 'loaded',
-          apiVersion: '2.0'
+          apiVersion: '2.0',
+          tcfPolicyVersion: 2
         }, true);
       }
     };
@@ -45,7 +47,7 @@
 </head>
 <body>
   <h1>Publicador externo falso</h1>
-  <div id="div-gpt-ad"></div>
+  <div id="div-gpt-ad" aria-label="Espacio publicitario de prueba"></div>
 
   <script>
     (function () {
