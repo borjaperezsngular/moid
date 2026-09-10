@@ -86,6 +86,9 @@
           googletag.pubads().refresh();
         });
       };
+      s.onerror = function () {
+        document.getElementById('div-gpt-ad').textContent = 'No se pudo cargar el script del publisher.';
+      };
       s.src = 'https://masorangeadvertising.es/advertising/publisher-script?siteId=test';
       document.head.appendChild(s);
     })();
