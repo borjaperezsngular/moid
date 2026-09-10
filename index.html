@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Fake Publisher - MOID test</title>
+
+  <script>
+    window.__tcfapi = function (command, version, callback) {
+      if (command === 'getTCData' || command === 'addEventListener') {
+        callback({
+          gdprApplies: false,
+          purpose: { consents: { 1: true, 3: true, 4: true, 7: true } },
+          vendor: { consents: {} }
+        }, true);
+        return;
+      }
+      if (command === 'ping') {
+        callback({ gdprApplies: false, cmpLoaded: true }, true);
+      }
+    };
+  </script>
+
+  <script>
+    window.MasOrangeMoidConfig = {
+      VENDOR_ID: null,
+      ENDPOINT: 'https://masorangeadvertising.es/advertising/moid'
+    };
+  </script>
+
+  <script async src="https://securepubads.g.doubleclick.net/tag/js/gpt.js"></script>
+  <script>
+    window.googletag = window.googletag || { cmd: [] };
+    googletag.cmd.push(function () {
+      googletag.defineSlot('/6355419/Travel/Europe', [300, 250], 'div-gpt-ad')
+        .addService(googletag.pubads());
+      googletag.enableServices();
+    });
+  </script>
+</head>
+<body>
+  <h1>Fake third-party publisher</h1>
+  <div id="div-gpt-ad"></div>
+
+  <script>
+    (function () {
+      fetch('https://masorangeadvertising.es/advertising/publisher-script?siteId=test')
+        .then(function (r) { return r.text(); })
+        .then(function (code) {
+          var s = document.createElement('script');
+          s.text = code;
+          document.head.appendChild(s);
+        });
+    })();
+  </script>
+</body>
+</html>
