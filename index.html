@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Fake Publisher - MOID test</title>
+  <title>Publicador falso - prueba MOID</title>
 
   <script>
     window.__tcfapi = function (command, version, callback) {
@@ -38,7 +38,7 @@
   </script>
 </head>
 <body>
-  <h1>Fake third-party publisher</h1>
+  <h1>Publicador externo falso</h1>
   <div id="div-gpt-ad"></div>
 
   <script>
@@ -48,6 +48,7 @@
       });
 
       var s = document.createElement('script');
+      s.async = true;
       s.src = 'https://masorangeadvertising.es/advertising/publisher-script?siteId=test';
       document.head.appendChild(s);
     })();
