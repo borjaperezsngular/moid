@@ -34,7 +34,6 @@
       googletag.defineSlot('/6355419/Travel/Europe', [300, 250], 'div-gpt-ad')
         .addService(googletag.pubads());
       googletag.enableServices();
-      googletag.display('div-gpt-ad');
     });
   </script>
 </head>
@@ -44,6 +43,10 @@
 
   <script>
     (function () {
+      googletag.cmd.push(function () {
+        googletag.display('div-gpt-ad');
+      });
+
       var s = document.createElement('script');
       s.src = 'https://masorangeadvertising.es/advertising/publisher-script?siteId=test';
       document.head.appendChild(s);
