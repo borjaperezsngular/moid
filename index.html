@@ -6,6 +6,11 @@
 
   <script>
     window.__tcfapi = function (command, version, callback) {
+      if (version !== 2) {
+        callback(null, false);
+        return;
+      }
+
       if (command === 'getTCData' || command === 'addEventListener') {
         callback({
           gdprApplies: false,
@@ -47,7 +52,7 @@
 </head>
 <body>
   <h1>Publicador externo falso</h1>
-  <div id="div-gpt-ad" aria-label="Espacio publicitario de prueba"></div>
+  <div id="div-gpt-ad" role="region" aria-label="Espacio publicitario de prueba"></div>
 
   <script>
     (function () {
