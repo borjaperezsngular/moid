@@ -62,7 +62,7 @@
 
     // 1) Prebid completo primero
     var prebidScript = document.createElement('script');
-    prebidScript.src = 'https://cdn.jsdelivr.net/npm/prebid.js@9.53.2/dist/prebid.js';
+    prebidScript.src = 'https://cdn.jsdelivr.net/npm/prebid.js@latest/dist/prebid.js';
     prebidScript.onload = loadMoidLoader;
     prebidScript.onerror = function () {
       document.getElementById('div-gpt-ad').textContent = 'No se pudo cargar prebid.js';
