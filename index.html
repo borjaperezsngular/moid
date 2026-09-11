@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <title>Publicador falso - prueba MOID</title>
-<script src="https://cdn.jsdelivr.net/npm/prebid.js@latest/dist/prebid.js"></script>
+
 <script>
-  var pbjs = pbjs || {};
-  pbjs.que = pbjs.que || [];
+  window.pbjs = window.pbjs || { que: [] };
 </script>
+  <script async src="https://cdn.jsdelivr.net/npm/prebid.js@latest/dist/prebid.js"></script>
   <script>
     var moidPurposeConsents = { 1: true, 3: true, 4: true, 7: true };
     var moidTcData = {
