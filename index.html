@@ -74,10 +74,7 @@
       var s = document.createElement('script');
       s.async = true;
       s.onload = function () {
-        googletag.cmd.push(function () {
-          googletag.display('div-gpt-ad');
-          googletag.pubads().refresh();
-        });
+        console.log(pbjs);
       };
       s.onerror = function () {
         document.getElementById('div-gpt-ad').textContent = 'No se pudo cargar el script del publisher.';
