@@ -4,10 +4,11 @@
   <meta charset="UTF-8" />
   <title>Publicador falso - prueba MOID</title>
 
-<script>
-  window.pbjs = window.pbjs || { que: [] };
-</script>
-  <script async src="https://cdn.jsdelivr.net/npm/prebid.js@latest/dist/prebid.js"></script>
+  <script>
+    window.pbjs = window.pbjs || { que: [] };
+  </script>
+
+  <!-- CMP mock -->
   <script>
     var moidPurposeConsents = { 1: true, 3: true, 4: true, 7: true };
     var moidTcData = {
@@ -22,38 +23,11 @@
     };
 
     window.__tcfapi = function (command, version, callback) {
-      if (version !== 2) {
-        callback(null, false);
-        return;
-      }
-
-      if (command === 'getTCData') {
-        callback(moidTcData, true);
-        return;
-      }
-
-      if (command === 'addEventListener') {
-        callback(moidTcData, true);
-        return moidTcData.listenerId;
-      }
-
-      if (command === 'removeEventListener') {
-        callback(moidTcData, true);
-        return;
-      }
-
-      if (command === 'ping') {
-        callback({
-          gdprApplies: false,
-          cmpLoaded: true,
-          cmpId: 1,
-          cmpStatus: 'loaded',
-          apiVersion: '2.0',
-          tcfPolicyVersion: 2
-        }, true);
-        return;
-      }
-
+      if (version !== 2) return callback(null, false);
+      if (command === 'getTCData') return callback(moidTcData, true);
+      if (command === 'addEventListener') { callback(moidTcData, true); return moidTcData.listenerId; }
+      if (command === 'removeEventListener') return callback(moidTcData, true);
+      if (command === 'ping') return callback({ gdprApplies: false, cmpLoaded: true, cmpId: 1, cmpStatus: 'loaded', apiVersion: '2.0', tcfPolicyVersion: 2 }, true);
       callback(null, false);
     };
   </script>
@@ -70,18 +44,30 @@
   <div id="div-gpt-ad" role="group" aria-label="Contenedor del anuncio de prueba"></div>
 
   <script>
-    (function () {
+    function loadMoidLoader() {
       var s = document.createElement('script');
       s.async = true;
+      s.src = 'https://advertising-moid-middleware.sta.masstack.com/v1/api/moid/loader.js';
       s.onload = function () {
-        console.log(pbjs);
+        // Re-intentar integración por si init corrió antes de que Prebid estuviera 100% listo
+        if (window.MasOrangeMoid?.init) {
+          window.MasOrangeMoid.init();
+        }
       };
       s.onerror = function () {
-        document.getElementById('div-gpt-ad').textContent = 'No se pudo cargar el script del publisher.';
+        document.getElementById('div-gpt-ad').textContent = 'No se pudo cargar moid-loader.js';
       };
-      s.src = 'https://advertising-moid-middleware.sta.masstack.com/v1/api/moid/loader.js';
       document.head.appendChild(s);
-    })();
+    }
+
+    // 1) Prebid completo primero
+    var prebidScript = document.createElement('script');
+    prebidScript.src = 'https://cdn.jsdelivr.net/npm/prebid.js@9.53.2/dist/prebid.js';
+    prebidScript.onload = loadMoidLoader;
+    prebidScript.onerror = function () {
+      document.getElementById('div-gpt-ad').textContent = 'No se pudo cargar prebid.js';
+    };
+    document.head.appendChild(prebidScript);
   </script>
 </body>
 </html>
