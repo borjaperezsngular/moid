@@ -57,19 +57,8 @@
   <script>
     window.MasOrangeMoidConfig = {
       VENDOR_ID: null,
-      ENDPOINT: 'https://masorangeadvertising.es/advertising/moid'
+      ENDPOINT: 'https://advertising-moid-middleware.sta.masstack.com/v1/api/moid/resolve'
     };
-  </script>
-
-  <script async src="https://securepubads.g.doubleclick.net/tag/js/gpt.js"></script>
-  <script>
-    window.googletag = window.googletag || { cmd: [] };
-    googletag.cmd.push(function () {
-      googletag.defineSlot('/6355419/Travel/Europe', [300, 250], 'div-gpt-ad')
-        .addService(googletag.pubads());
-      googletag.pubads().disableInitialLoad();
-      googletag.enableServices();
-    });
   </script>
 </head>
 <body>
@@ -89,7 +78,7 @@
       s.onerror = function () {
         document.getElementById('div-gpt-ad').textContent = 'No se pudo cargar el script del publisher.';
       };
-      s.src = 'https://masorangeadvertising.es/advertising/publisher-script?siteId=test';
+      s.src = 'https://advertising-moid-middleware.sta.masstack.com/v1/api/moid/loader.js';
       document.head.appendChild(s);
     })();
   </script>
