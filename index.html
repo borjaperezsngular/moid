@@ -3,68 +3,127 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Publisher externo — prueba MOID</title>
+    <title>El Periódico Demo — Noticias</title>
     <style>
       :root {
-        color-scheme: light dark;
-        font-family:
-          system-ui,
-          -apple-system,
-          sans-serif;
-        line-height: 1.5;
+        color-scheme: light;
+        font-family: Georgia, 'Times New Roman', serif;
+        line-height: 1.6;
       }
 
-      body {
-        margin: 0 auto;
-        max-width: 720px;
-        padding: 24px 24px 120px;
-      }
-
-      h1 {
-        font-size: 1.35rem;
-        margin-bottom: 0.25rem;
-      }
-
-      .lead {
-        color: #666;
-        margin-top: 0;
-      }
-
-      section {
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        margin: 16px 0;
-        padding: 16px;
-      }
-
-      label {
-        display: block;
-        margin: 8px 0;
-      }
-
-      input[type='text'] {
-        font: inherit;
-        padding: 8px 12px;
-        width: 100%;
+      * {
         box-sizing: border-box;
       }
 
-      button {
-        cursor: pointer;
-        font: inherit;
-        padding: 8px 14px;
+      body {
+        background: #fafafa;
+        color: #222;
+        margin: 0;
       }
 
-      pre {
+      .site-header {
+        background: #1a1a1a;
+        color: #fff;
+        padding: 16px 24px;
+      }
+
+      .site-header h1 {
+        font-family: system-ui, sans-serif;
+        font-size: 1.25rem;
+        margin: 0;
+      }
+
+      .site-header p {
+        font-family: system-ui, sans-serif;
+        font-size: 0.85rem;
+        margin: 4px 0 0;
+        opacity: 0.75;
+      }
+
+      .layout {
+        display: grid;
+        gap: 24px;
+        grid-template-columns: 1fr;
+        margin: 0 auto;
+        max-width: 960px;
+        padding: 24px;
+      }
+
+      @media (min-width: 768px) {
+        .layout {
+          grid-template-columns: 1fr 300px;
+        }
+      }
+
+      article h2 {
+        font-size: 1.75rem;
+        line-height: 1.25;
+        margin-top: 0;
+      }
+
+      .ad-slot {
+        align-items: center;
+        background: #eee;
+        border: 1px dashed #bbb;
+        color: #666;
+        display: flex;
+        font-family: system-ui, sans-serif;
+        font-size: 0.85rem;
+        justify-content: center;
+        min-height: 250px;
+        text-align: center;
+      }
+
+      .qa-panel {
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-family: system-ui, sans-serif;
+        font-size: 0.9rem;
+        margin: 24px auto;
+        max-width: 960px;
+        padding: 0 16px 16px;
+      }
+
+      .qa-panel summary {
+        cursor: pointer;
+        font-weight: 600;
+        padding: 16px 0;
+      }
+
+      .qa-panel pre {
         background: #111;
         border-radius: 8px;
         color: #f5f5f5;
-        font-size: 0.85rem;
-        margin: 0;
+        font-size: 0.8rem;
         overflow: auto;
         padding: 12px;
         white-space: pre-wrap;
         word-break: break-word;
+      }
+
+      .qa-panel label {
+        display: block;
+        margin: 8px 0;
+      }
+
+      .qa-panel input[type='text'] {
+        font: inherit;
+        padding: 8px;
+        width: 100%;
+      }
+
+      .qa-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 12px;
+      }
+
+      .qa-actions button {
+        cursor: pointer;
+        font: inherit;
+        padding: 8px 12px;
       }
 
       .cmp-banner {
@@ -72,6 +131,7 @@
         border-top: 1px solid #ccc;
         bottom: 0;
         box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.12);
+        font-family: system-ui, sans-serif;
         left: 0;
         padding: 20px 24px;
         position: fixed;
@@ -94,28 +154,24 @@
       }
 
       .cmp-actions button.primary {
-        background: #5f3ce0;
+        background: #1a1a1a;
         border: 0;
-        border-radius: 6px;
+        border-radius: 4px;
         color: #fff;
+        padding: 10px 16px;
       }
 
       .cmp-actions button.secondary {
         background: transparent;
         border: 1px solid #999;
-        border-radius: 6px;
-      }
-
-      code {
-        background: rgba(127, 127, 127, 0.15);
         border-radius: 4px;
-        padding: 1px 4px;
+        padding: 10px 16px;
       }
     </style>
 
-    <!-- 1) Publisher CMP mock — must exist before MOID loader -->
+    <!-- CMP (third-party consent platform on publisher site) -->
     <script>
-      ;(function installPublisherCmpMock() {
+      ;(function () {
         var cmpListeners = []
         var listenerSeq = 1
         var purposeConsents = { 1: false, 3: false, 4: false, 7: false }
@@ -127,8 +183,6 @@
             gdprApplies: true,
             purpose: { consents: purposeConsents },
             vendor: { consents: {} },
-            purposeConsents: purposeConsents,
-            vendorConsents: {},
           }
         }
 
@@ -140,20 +194,16 @@
         }
 
         window.__publisherCmpMock = {
-          grantAll: function () {
-            purposeConsents = { 1: true, 3: true, 4: true, 7: true }
-            notifyListeners('useractioncomplete')
-          },
           denyAll: function () {
             purposeConsents = { 1: false, 3: false, 4: false, 7: false }
             notifyListeners('useractioncomplete')
           },
+          grantAll: function () {
+            purposeConsents = { 1: true, 3: true, 4: true, 7: true }
+            notifyListeners('useractioncomplete')
+          },
           getPurposes: function () {
             return purposeConsents
-          },
-          reset: function () {
-            purposeConsents = { 1: false, 3: false, 4: false, 7: false }
-            cmpListeners = []
           },
         }
 
@@ -162,7 +212,7 @@
             return
           }
 
-          if (command === 'getTCData') {
+          if (command === 'getTCData' || command === 'removeEventListener') {
             callback(buildTcData('tcloaded'), true)
             return
           }
@@ -174,22 +224,8 @@
             return listenerId
           }
 
-          if (command === 'removeEventListener') {
-            callback(buildTcData('tcloaded'), true)
-            return
-          }
-
           if (command === 'ping') {
-            callback(
-              {
-                apiVersion: '2.0',
-                cmpId: 1,
-                cmpLoaded: true,
-                cmpStatus: 'loaded',
-                gdprApplies: true,
-              },
-              true,
-            )
+            callback({ cmpLoaded: true, cmpStatus: 'loaded', gdprApplies: true }, true)
             return
           }
 
@@ -198,81 +234,111 @@
       })()
     </script>
 
-    <!-- 2) Optional publisher ad stack stub (not shipped by MasOrange) -->
+    <!-- Prebid — standard publisher bootstrap (MasOrange does NOT provide this) -->
     <script>
-      window.pbjs = window.pbjs || { que: [] }
-    </script>
+      var pbjs = pbjs || {}
+      pbjs.que = pbjs.que || []
 
-    <!-- 3) Publisher may override loader config before injecting the script -->
-    <script>
-      window.MasOrangeMoidConfig = {
-        VENDOR_ID: null,
-        ENDPOINT: 'https://advertising-moid-middleware.sta.masstack.com/v1/api/moid/resolve',
-      }
+      pbjs.que.push(function () {
+        pbjs.setConfig({
+          bidderTimeout: 3000,
+          enableSendAllBids: true,
+          priceGranularity: 'medium',
+        })
+      })
     </script>
+    <script async src="prebid.js"></script>
+
+    <!-- Google Publisher Tag — same pattern as major publishers -->
+    <script>
+      window.googletag = window.googletag || { cmd: [] }
+
+      googletag.cmd.push(function () {
+        googletag
+          .defineSlot('/232060617/elperiodicodemo/home_top', [[728, 90], [320, 50]], 'div-gpt-ad')
+          .addService(googletag.pubads())
+        googletag.pubads().enableSingleRequest()
+        googletag.enableServices()
+      })
+    </script>
+    <script async src="https://securepubads.g.doubleclick.net/tag/js/gpt.js" crossorigin="anonymous"></script>
   </head>
   <body>
-    <h1>Publicador externo (simulación)</h1>
-    <p class="lead">
-      Replica el contrato vendor: CMP del publisher → usuario acepta → carga del loader MOID. Sin Prebid
-      incluido por MasOrange.
-    </p>
+    <header class="site-header">
+      <h1>El Periódico Demo</h1>
+      <p>Sección · Actualidad · Página de prueba de integración publicitaria</p>
+    </header>
 
-    <section>
-      <strong>Modo de integración</strong>
+    <div class="layout">
+      <article>
+        <h2>Titular de prueba: la web del publisher carga su propio stack antes que MOID</h2>
+        <p>
+          Esta página imita un medio externo: CMP, Prebid (<code>prebid.js</code> propio del site) y GPT
+          se cargan como en producción. MasOrange solo entra con <code>loader.js</code> tras el
+          consentimiento.
+        </p>
+        <p>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. El ad server del publisher ejecutará
+          header bidding con la configuración ya aplicada en <code>pbjs</code>.
+        </p>
+      </article>
+
+      <aside>
+        <div class="ad-slot" id="div-gpt-ad">Publicidad · 728×90 / 320×50</div>
+      </aside>
+    </div>
+
+    <details class="qa-panel" open>
+      <summary>Panel QA MasOrange (interno — no forma parte del site del publisher)</summary>
+
+      <p id="checklist">⏳ Acepta cookies en el banner para iniciar MOID…</p>
+
       <label>
         <input checked name="integrationMode" type="radio" value="inject-on-accept" />
-        A — Inyectar <code>loader.js</code> solo tras aceptar cookies (publisher controla el script)
+        Modo A — Inyectar loader.js tras aceptar (recomendado)
       </label>
       <label>
         <input name="integrationMode" type="radio" value="loader-early" />
-        B — Loader ya en la página; MOID escucha <code>addEventListener</code> del CMP al aceptar
+        Modo B — Loader en página + listener CMP
       </label>
-      <label style="margin-top: 12px">
-        URL del loader
+      <label>
+        URL loader MOID
         <input
           id="loaderUrl"
           type="text"
           value="https://advertising-moid-middleware.sta.masstack.com/v1/api/moid/loader.js"
         />
       </label>
-      <p style="font-size: 0.9rem; color: #666; margin: 8px 0 0">
-        Local: <code>http://localhost:4321/moid-loader.js</code> con <code>pnpm nx serve-test moid</code>
-        (build STA previo).
+      <p style="color: #666; font-size: 0.85rem">
+        Local: <code>/moid-loader.js</code> tras <code>pnpm nx build moid --configuration=sta</code> +
+        <code>pnpm nx serve-test moid</code>
       </p>
-    </section>
 
-    <section>
-      <strong>Estado MOID</strong>
-      <pre id="status">Esperando acción en el banner de cookies…</pre>
-      <div style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap">
-        <button id="btnRefresh" type="button">Actualizar estado</button>
+      <pre id="status">—</pre>
+      <div class="qa-actions">
+        <button id="btnRefresh" type="button">Actualizar</button>
         <button id="btnClearCookies" type="button">Borrar cookies MOID</button>
-        <button id="btnReopenBanner" type="button">Reabrir banner</button>
       </div>
-    </section>
-
-    <section>
-      <strong>Log de la página (no sustituye consola [MOID])</strong>
       <pre id="pageLog"></pre>
-    </section>
+    </details>
 
-    <div class="cmp-banner" id="cmpBanner" role="dialog" aria-label="Preferencias de cookies">
+    <div class="cmp-banner" id="cmpBanner" role="dialog" aria-label="Consentimiento de cookies">
       <p>
-        Usamos cookies para publicidad personalizada. Este sitio simula un publisher externo: hasta que no
-        aceptes, MOID no debe resolver identificador.
+        Utilizamos cookies propias y de terceros para personalizar contenido y publicidad. Puede aceptar
+        todas las cookies o configurar sus preferencias.
       </p>
       <div class="cmp-actions">
-        <button class="primary" id="btnAccept" type="button">Aceptar cookies</button>
+        <button class="primary" id="btnAccept" type="button">Aceptar todas</button>
         <button class="secondary" id="btnReject" type="button">Rechazar</button>
       </div>
     </div>
 
     <script>
-      ;(function publisherPage() {
+      ;(function () {
         var loaderInjected = false
         var logEl = document.getElementById('pageLog')
         var statusEl = document.getElementById('status')
+        var checklistEl = document.getElementById('checklist')
         var bannerEl = document.getElementById('cmpBanner')
 
         var appendLog = function (message) {
@@ -285,43 +351,87 @@
           return selected ? selected.value : 'inject-on-accept'
         }
 
+        var getPrebidEids = function () {
+          var ortb2 = window.pbjs?.getConfig?.('ortb2')
+          return ortb2?.user?.ext?.eids || null
+        }
+
+        var getGptMoidTargeting = function () {
+          if (typeof window.googletag?.pubads !== 'function') {
+            return null
+          }
+
+          try {
+            return window.googletag.pubads().getTargeting('mas_adv_moid')?.[0] || null
+          } catch (error) {
+            return null
+          }
+        }
+
         var refreshStatus = function () {
           var moid = window.MasOrangeMoid?.get?.() || window.__moid?.id || null
-          var session = window.MasOrangeMoid?.getSession?.() || window.__moid?.session || null
+          var prebidEids = getPrebidEids()
+          var gptMoid = getGptMoidTargeting()
+
+          var items = [
+            { ok: !!window.pbjs?.setConfig, label: 'Prebid cargado (pbjs.setConfig)' },
+            { ok: !!window.googletag?.pubads, label: 'GPT cargado (googletag.pubads)' },
+            { ok: !!moid, label: 'MOID resuelto' },
+            { ok: !!prebidEids, label: 'MOID → Prebid ortb2 EIDs' },
+            { ok: !!gptMoid, label: 'MOID → GPT mas_adv_moid' },
+          ]
+
+          var allOk = items.every(function (item) {
+            return item.ok
+          })
+
+          checklistEl.textContent =
+            items
+              .map(function (item) {
+                return (item.ok ? '✅' : '⬜') + ' ' + item.label
+              })
+              .join('\n') +
+            (allOk ? '\n\n✅ Integración E2E completa' : '')
+
           statusEl.textContent = JSON.stringify(
             {
-              cookies: document.cookie || '(vacío)',
-              integrationMode: getIntegrationMode(),
+              gptMasAdvMoid: gptMoid,
               loaderInjected: loaderInjected,
               moid: moid,
-              purposes: window.__publisherCmpMock.getPurposes(),
-              session: session,
+              pbjsVersion: window.pbjs?.version || null,
+              prebidOrtb2Eids: prebidEids,
+              testComplete: allOk,
             },
             null,
             2,
           )
+
+          return allOk
         }
 
         var injectMoidLoader = function () {
           if (loaderInjected) {
-            appendLog('Loader ya inyectado — omitiendo segundo script')
             return
           }
 
           var url = document.getElementById('loaderUrl').value.trim()
           if (!url) {
-            appendLog('URL del loader vacía')
             return
           }
 
+          window.MasOrangeMoidConfig = {
+            ENDPOINT: 'https://advertising-moid-middleware.sta.masstack.com/v1/api/moid/resolve',
+            VENDOR_ID: null,
+          }
+
           loaderInjected = true
-          appendLog('Publisher inyecta loader: ' + url)
+          appendLog('Tag MOID insertado: ' + url)
 
           var script = document.createElement('script')
           script.async = true
           script.src = url
           script.onload = function () {
-            appendLog('loader.js descargado — bootstrap auto-init (no llamar init() manual)')
+            appendLog('loader.js cargado')
             refreshStatus()
           }
           script.onerror = function () {
@@ -331,67 +441,47 @@
           document.head.appendChild(script)
         }
 
-        var loadLoaderEarlyIfNeeded = function () {
-          if (getIntegrationMode() === 'loader-early') {
-            appendLog('Modo B: loader presente antes del consentimiento')
-            injectMoidLoader()
-          }
-        }
-
         document.getElementById('btnAccept').addEventListener('click', function () {
-          appendLog('Usuario acepta cookies (CMP mock → useractioncomplete)')
           window.__publisherCmpMock.grantAll()
           bannerEl.hidden = true
+          appendLog('Consentimiento aceptado')
 
           if (getIntegrationMode() === 'inject-on-accept') {
             injectMoidLoader()
           }
 
-          setTimeout(refreshStatus, 500)
-          setTimeout(refreshStatus, 2500)
+          ;[800, 2000, 4000].forEach(function (delay) {
+            setTimeout(refreshStatus, delay)
+          })
         })
 
         document.getElementById('btnReject').addEventListener('click', function () {
-          appendLog('Usuario rechaza cookies')
           window.__publisherCmpMock.denyAll()
           bannerEl.hidden = true
-          setTimeout(refreshStatus, 300)
+          appendLog('Consentimiento rechazado')
+          refreshStatus()
         })
 
         document.getElementById('btnRefresh').addEventListener('click', refreshStatus)
 
         document.getElementById('btnClearCookies').addEventListener('click', function () {
-          if (window.MasOrangeMoid?.clear) {
-            window.MasOrangeMoid.clear()
-          }
+          window.MasOrangeMoid?.clear?.()
           document.cookie.split(';').forEach(function (part) {
             var name = part.split('=')[0].trim()
             if (name.indexOf('mas_adv_') === 0) {
               document.cookie = name + '=; Max-Age=0; path=/'
             }
           })
-          appendLog('Cookies MOID borradas')
+          appendLog('Cookies MOID eliminadas')
           refreshStatus()
         })
 
-        document.getElementById('btnReopenBanner').addEventListener('click', function () {
-          window.__publisherCmpMock.reset()
-          loaderInjected = false
-          bannerEl.hidden = false
-          appendLog('Banner reabierto — recarga la página para repetir modo B desde cero')
-          refreshStatus()
-        })
+        if (getIntegrationMode() === 'loader-early') {
+          injectMoidLoader()
+        }
 
-        document.querySelectorAll('input[name="integrationMode"]').forEach(function (input) {
-          input.addEventListener('change', function () {
-            appendLog('Modo seleccionado: ' + getIntegrationMode())
-            refreshStatus()
-          })
-        })
-
-        appendLog('Página publisher lista — CMP mock sin consentimiento inicial')
+        appendLog('Publisher listo — prebid.js + GPT en carga async')
         refreshStatus()
-        loadLoaderEarlyIfNeeded()
       })()
     </script>
   </body>
