@@ -1,73 +1,398 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <title>Publicador falso - prueba MOID</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Publisher externo — prueba MOID</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+        line-height: 1.5;
+      }
 
-  <script>
-    window.pbjs = window.pbjs || { que: [] };
-  </script>
+      body {
+        margin: 0 auto;
+        max-width: 720px;
+        padding: 24px 24px 120px;
+      }
 
-  <!-- CMP mock -->
-  <script>
-    var moidPurposeConsents = { 1: true, 3: true, 4: true, 7: true };
-    var moidTcData = {
-      gdprApplies: false,
-      cmpStatus: 'loaded',
-      eventStatus: 'tcloaded',
-      purpose: { consents: moidPurposeConsents },
-      vendor: { consents: {} },
-      purposeConsents: moidPurposeConsents,
-      vendorConsents: {},
-      listenerId: 1
-    };
+      h1 {
+        font-size: 1.35rem;
+        margin-bottom: 0.25rem;
+      }
 
-    window.__tcfapi = function (command, version, callback) {
-      if (version !== 2) return callback(null, false);
-      if (command === 'getTCData') return callback(moidTcData, true);
-      if (command === 'addEventListener') { callback(moidTcData, true); return moidTcData.listenerId; }
-      if (command === 'removeEventListener') return callback(moidTcData, true);
-      if (command === 'ping') return callback({ gdprApplies: false, cmpLoaded: true, cmpId: 1, cmpStatus: 'loaded', apiVersion: '2.0', tcfPolicyVersion: 2 }, true);
-      callback(null, false);
-    };
-  </script>
+      .lead {
+        color: #666;
+        margin-top: 0;
+      }
 
-  <script>
-    window.MasOrangeMoidConfig = {
-      VENDOR_ID: null,
-      ENDPOINT: 'https://advertising-moid-middleware.sta.masstack.com/v1/api/moid/resolve'
-    };
-  </script>
-</head>
-<body>
-  <h1>Publicador externo falso</h1>
-  <div id="div-gpt-ad" role="group" aria-label="Contenedor del anuncio de prueba"></div>
+      section {
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        margin: 16px 0;
+        padding: 16px;
+      }
 
-  <script>
-    function loadMoidLoader() {
-      var s = document.createElement('script');
-      s.async = true;
-      s.src = 'https://advertising-moid-middleware.sta.masstack.com/v1/api/moid/loader.js';
-      s.onload = function () {
-        // Re-intentar integración por si init corrió antes de que Prebid estuviera 100% listo
-        if (window.MasOrangeMoid?.init) {
-          window.MasOrangeMoid.init();
+      label {
+        display: block;
+        margin: 8px 0;
+      }
+
+      input[type='text'] {
+        font: inherit;
+        padding: 8px 12px;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      button {
+        cursor: pointer;
+        font: inherit;
+        padding: 8px 14px;
+      }
+
+      pre {
+        background: #111;
+        border-radius: 8px;
+        color: #f5f5f5;
+        font-size: 0.85rem;
+        margin: 0;
+        overflow: auto;
+        padding: 12px;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      .cmp-banner {
+        background: #fff;
+        border-top: 1px solid #ccc;
+        bottom: 0;
+        box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.12);
+        left: 0;
+        padding: 20px 24px;
+        position: fixed;
+        right: 0;
+        z-index: 1000;
+      }
+
+      .cmp-banner[hidden] {
+        display: none;
+      }
+
+      .cmp-banner p {
+        margin: 0 0 12px;
+      }
+
+      .cmp-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .cmp-actions button.primary {
+        background: #5f3ce0;
+        border: 0;
+        border-radius: 6px;
+        color: #fff;
+      }
+
+      .cmp-actions button.secondary {
+        background: transparent;
+        border: 1px solid #999;
+        border-radius: 6px;
+      }
+
+      code {
+        background: rgba(127, 127, 127, 0.15);
+        border-radius: 4px;
+        padding: 1px 4px;
+      }
+    </style>
+
+    <!-- 1) Publisher CMP mock — must exist before MOID loader -->
+    <script>
+      ;(function installPublisherCmpMock() {
+        var cmpListeners = []
+        var listenerSeq = 1
+        var purposeConsents = { 1: false, 3: false, 4: false, 7: false }
+
+        var buildTcData = function (eventStatus) {
+          return {
+            cmpStatus: 'loaded',
+            eventStatus: eventStatus || 'tcloaded',
+            gdprApplies: true,
+            purpose: { consents: purposeConsents },
+            vendor: { consents: {} },
+            purposeConsents: purposeConsents,
+            vendorConsents: {},
+          }
         }
-      };
-      s.onerror = function () {
-        document.getElementById('div-gpt-ad').textContent = 'No se pudo cargar moid-loader.js';
-      };
-      document.head.appendChild(s);
-    }
 
-    // 1) Prebid completo primero
-    var prebidScript = document.createElement('script');
-    prebidScript.src = 'https://cdn.jsdelivr.net/npm/prebid.js@latest/dist/prebid.js';
-    prebidScript.onload = loadMoidLoader;
-    prebidScript.onerror = function () {
-      document.getElementById('div-gpt-ad').textContent = 'No se pudo cargar prebid.js';
-    };
-    document.head.appendChild(prebidScript);
-  </script>
-</body>
+        var notifyListeners = function (eventStatus) {
+          var tcData = buildTcData(eventStatus)
+          cmpListeners.forEach(function (entry) {
+            entry.callback(tcData, true)
+          })
+        }
+
+        window.__publisherCmpMock = {
+          grantAll: function () {
+            purposeConsents = { 1: true, 3: true, 4: true, 7: true }
+            notifyListeners('useractioncomplete')
+          },
+          denyAll: function () {
+            purposeConsents = { 1: false, 3: false, 4: false, 7: false }
+            notifyListeners('useractioncomplete')
+          },
+          getPurposes: function () {
+            return purposeConsents
+          },
+          reset: function () {
+            purposeConsents = { 1: false, 3: false, 4: false, 7: false }
+            cmpListeners = []
+          },
+        }
+
+        window.__tcfapi = function (command, version, callback) {
+          if (version !== 2 || typeof callback !== 'function') {
+            return
+          }
+
+          if (command === 'getTCData') {
+            callback(buildTcData('tcloaded'), true)
+            return
+          }
+
+          if (command === 'addEventListener') {
+            var listenerId = listenerSeq++
+            cmpListeners.push({ callback: callback, id: listenerId })
+            callback(buildTcData('tcloaded'), true)
+            return listenerId
+          }
+
+          if (command === 'removeEventListener') {
+            callback(buildTcData('tcloaded'), true)
+            return
+          }
+
+          if (command === 'ping') {
+            callback(
+              {
+                apiVersion: '2.0',
+                cmpId: 1,
+                cmpLoaded: true,
+                cmpStatus: 'loaded',
+                gdprApplies: true,
+              },
+              true,
+            )
+            return
+          }
+
+          callback(null, false)
+        }
+      })()
+    </script>
+
+    <!-- 2) Optional publisher ad stack stub (not shipped by MasOrange) -->
+    <script>
+      window.pbjs = window.pbjs || { que: [] }
+    </script>
+
+    <!-- 3) Publisher may override loader config before injecting the script -->
+    <script>
+      window.MasOrangeMoidConfig = {
+        VENDOR_ID: null,
+        ENDPOINT: 'https://advertising-moid-middleware.sta.masstack.com/v1/api/moid/resolve',
+      }
+    </script>
+  </head>
+  <body>
+    <h1>Publicador externo (simulación)</h1>
+    <p class="lead">
+      Replica el contrato vendor: CMP del publisher → usuario acepta → carga del loader MOID. Sin Prebid
+      incluido por MasOrange.
+    </p>
+
+    <section>
+      <strong>Modo de integración</strong>
+      <label>
+        <input checked name="integrationMode" type="radio" value="inject-on-accept" />
+        A — Inyectar <code>loader.js</code> solo tras aceptar cookies (publisher controla el script)
+      </label>
+      <label>
+        <input name="integrationMode" type="radio" value="loader-early" />
+        B — Loader ya en la página; MOID escucha <code>addEventListener</code> del CMP al aceptar
+      </label>
+      <label style="margin-top: 12px">
+        URL del loader
+        <input
+          id="loaderUrl"
+          type="text"
+          value="https://advertising-moid-middleware.sta.masstack.com/v1/api/moid/loader.js"
+        />
+      </label>
+      <p style="font-size: 0.9rem; color: #666; margin: 8px 0 0">
+        Local: <code>http://localhost:4321/moid-loader.js</code> con <code>pnpm nx serve-test moid</code>
+        (build STA previo).
+      </p>
+    </section>
+
+    <section>
+      <strong>Estado MOID</strong>
+      <pre id="status">Esperando acción en el banner de cookies…</pre>
+      <div style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap">
+        <button id="btnRefresh" type="button">Actualizar estado</button>
+        <button id="btnClearCookies" type="button">Borrar cookies MOID</button>
+        <button id="btnReopenBanner" type="button">Reabrir banner</button>
+      </div>
+    </section>
+
+    <section>
+      <strong>Log de la página (no sustituye consola [MOID])</strong>
+      <pre id="pageLog"></pre>
+    </section>
+
+    <div class="cmp-banner" id="cmpBanner" role="dialog" aria-label="Preferencias de cookies">
+      <p>
+        Usamos cookies para publicidad personalizada. Este sitio simula un publisher externo: hasta que no
+        aceptes, MOID no debe resolver identificador.
+      </p>
+      <div class="cmp-actions">
+        <button class="primary" id="btnAccept" type="button">Aceptar cookies</button>
+        <button class="secondary" id="btnReject" type="button">Rechazar</button>
+      </div>
+    </div>
+
+    <script>
+      ;(function publisherPage() {
+        var loaderInjected = false
+        var logEl = document.getElementById('pageLog')
+        var statusEl = document.getElementById('status')
+        var bannerEl = document.getElementById('cmpBanner')
+
+        var appendLog = function (message) {
+          var ts = new Date().toISOString().slice(11, 23)
+          logEl.textContent = '[' + ts + '] ' + message + '\n' + logEl.textContent
+        }
+
+        var getIntegrationMode = function () {
+          var selected = document.querySelector('input[name="integrationMode"]:checked')
+          return selected ? selected.value : 'inject-on-accept'
+        }
+
+        var refreshStatus = function () {
+          var moid = window.MasOrangeMoid?.get?.() || window.__moid?.id || null
+          var session = window.MasOrangeMoid?.getSession?.() || window.__moid?.session || null
+          statusEl.textContent = JSON.stringify(
+            {
+              cookies: document.cookie || '(vacío)',
+              integrationMode: getIntegrationMode(),
+              loaderInjected: loaderInjected,
+              moid: moid,
+              purposes: window.__publisherCmpMock.getPurposes(),
+              session: session,
+            },
+            null,
+            2,
+          )
+        }
+
+        var injectMoidLoader = function () {
+          if (loaderInjected) {
+            appendLog('Loader ya inyectado — omitiendo segundo script')
+            return
+          }
+
+          var url = document.getElementById('loaderUrl').value.trim()
+          if (!url) {
+            appendLog('URL del loader vacía')
+            return
+          }
+
+          loaderInjected = true
+          appendLog('Publisher inyecta loader: ' + url)
+
+          var script = document.createElement('script')
+          script.async = true
+          script.src = url
+          script.onload = function () {
+            appendLog('loader.js descargado — bootstrap auto-init (no llamar init() manual)')
+            refreshStatus()
+          }
+          script.onerror = function () {
+            loaderInjected = false
+            appendLog('Error cargando loader.js')
+          }
+          document.head.appendChild(script)
+        }
+
+        var loadLoaderEarlyIfNeeded = function () {
+          if (getIntegrationMode() === 'loader-early') {
+            appendLog('Modo B: loader presente antes del consentimiento')
+            injectMoidLoader()
+          }
+        }
+
+        document.getElementById('btnAccept').addEventListener('click', function () {
+          appendLog('Usuario acepta cookies (CMP mock → useractioncomplete)')
+          window.__publisherCmpMock.grantAll()
+          bannerEl.hidden = true
+
+          if (getIntegrationMode() === 'inject-on-accept') {
+            injectMoidLoader()
+          }
+
+          setTimeout(refreshStatus, 500)
+          setTimeout(refreshStatus, 2500)
+        })
+
+        document.getElementById('btnReject').addEventListener('click', function () {
+          appendLog('Usuario rechaza cookies')
+          window.__publisherCmpMock.denyAll()
+          bannerEl.hidden = true
+          setTimeout(refreshStatus, 300)
+        })
+
+        document.getElementById('btnRefresh').addEventListener('click', refreshStatus)
+
+        document.getElementById('btnClearCookies').addEventListener('click', function () {
+          if (window.MasOrangeMoid?.clear) {
+            window.MasOrangeMoid.clear()
+          }
+          document.cookie.split(';').forEach(function (part) {
+            var name = part.split('=')[0].trim()
+            if (name.indexOf('mas_adv_') === 0) {
+              document.cookie = name + '=; Max-Age=0; path=/'
+            }
+          })
+          appendLog('Cookies MOID borradas')
+          refreshStatus()
+        })
+
+        document.getElementById('btnReopenBanner').addEventListener('click', function () {
+          window.__publisherCmpMock.reset()
+          loaderInjected = false
+          bannerEl.hidden = false
+          appendLog('Banner reabierto — recarga la página para repetir modo B desde cero')
+          refreshStatus()
+        })
+
+        document.querySelectorAll('input[name="integrationMode"]').forEach(function (input) {
+          input.addEventListener('change', function () {
+            appendLog('Modo seleccionado: ' + getIntegrationMode())
+            refreshStatus()
+          })
+        })
+
+        appendLog('Página publisher lista — CMP mock sin consentimiento inicial')
+        refreshStatus()
+        loadLoaderEarlyIfNeeded()
+      })()
+    </script>
+  </body>
 </html>
